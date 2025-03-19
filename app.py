@@ -1,23 +1,21 @@
 import streamlit as st
-from dotenv import load_dotenv
 from clickhouse_driver import Client
 from clickhouse_driver.errors import ServerException
 import pandas as pd
-import os
 import time
 from datetime import date
 
 # загружаем переменные виртуального окружения
-load_dotenv()
+
 
 def get_result(client_name, tracker_impressions, tracker_conversions, size):
     # Устанавливаем параметры подключения
     ch_client = Client(
-                    host=os.getenv("CH_HOST"),  
+                    host=st.secrets["db_username"],  
                     port=9440,   
-                    user=os.getenv("CH_USER"),   
-                    password=os.getenv("CH_PASSWORD"),
-                    database=os.getenv("CH_DATABASE"),
+                    user=st.secrets["db_username"],   
+                    password=st.secrets["db_username"],
+                    database=st.secrets["db_username"],
                     secure=True, 
                     verify=False
                     )
