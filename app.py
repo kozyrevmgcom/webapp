@@ -11,11 +11,11 @@ from datetime import date
 def get_result(client_name, tracker_impressions, tracker_conversions, size):
     # Устанавливаем параметры подключения
     ch_client = Client(
-                    host=st.secrets["db_username"],  
+                    host=st.secrets["CH_HOST"],  
                     port=9440,   
-                    user=st.secrets["db_username"],   
-                    password=st.secrets["db_username"],
-                    database=st.secrets["db_username"],
+                    user=st.secrets["CH_USER"],   
+                    password=st.secrets["CH_PASSWORD"],
+                    database=st.secrets["CH_DATABASE"],
                     secure=True, 
                     verify=False
                     )
