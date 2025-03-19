@@ -29,7 +29,7 @@ def get_result(client_name, tracker_impressions, tracker_conversions, size):
 
     first_date = date_range[0].strftime("%Y-%m-%d")
     second_date = date_range[1].strftime("%Y-%m-%d")
-    third_date = date_range[1] + timedelta(days=size)
+    third_date = (date_range[1] + timedelta(days=size)).strftime("%Y-%m-%d")
 
 
     query = f"""
@@ -111,13 +111,13 @@ tracker_conversions = st.sidebar.selectbox("Выберите трекер кон
 
 
 # Выбор даты в режиме диапазона
-
 date_range = st.sidebar.date_input(
     "Выберите период рекламной кампании",
-    value=(date.today() - timedelta(days=14), date.today()),  # Исправленный порядок
-    min_value=date(2025, 1, 1),
-    max_value=date.today() - timedelta(days=1),
+    value=(date.today(), date.today()),  # Значение по умолчанию (сегодня)
+    min_value=date(2025, 1, 1),  # Минимальная возможная дата
+    max_value=date.today(),  # Максимальная возможная дата
 )
+
 
 
 
