@@ -3,7 +3,7 @@ from clickhouse_driver import Client
 from clickhouse_driver.errors import ServerException
 import pandas as pd
 import time
-from datetime import date
+from datetime import date, timedelta
 
 # загружаем переменные виртуального окружения
 
@@ -29,6 +29,7 @@ def get_result(client_name, tracker_impressions, tracker_conversions, size):
 
     first_date = date_range[0].strftime("%Y-%m-%d")
     second_date = date_range[1].strftime("%Y-%m-%d")
+    third_date = date_range[1] + timedelta(days=size)
 
 
     query = f"""
@@ -56,7 +57,7 @@ def get_result(client_name, tracker_impressions, tracker_conversions, size):
                 FROM db1.{client_name}_{tracker_conversions} as c
                 JOIN db1.{client_name}_{tracker_impressions} as a ON c.advertising_id = a.advertising_id
                 WHERE datetime BETWEEN '{first_date}' AND '{second_date}' AND
-                event_time BETWEEN '{first_date}' AND '2025-03-10' AND
+                event_time BETWEEN '{first_date}' AND '{third_date}' AND
                 (toUnixTimestamp(c.event_time) - toUnixTimestamp(a.datetime)) BETWEEN 0 AND {size}*24*60*60
                 GROUP BY
                     c.advertising_id,
@@ -113,7 +114,7 @@ tracker_conversions = st.sidebar.selectbox("Выберите трекер кон
 date_range = st.sidebar.date_input(
     "Выберите период рекламной кампании",
     value=(date.today(), date.today()),  # Значение по умолчанию (сегодня)
-    min_value=date(2000, 1, 1),  # Минимальная возможная дата
+    min_value=date(2025, 1, 1),  # Минимальная возможная дата
     max_value=date.today(),  # Максимальная возможная дата
 )
 
@@ -127,14 +128,14 @@ else:
     st.write("Пожалуйста, выберите обе даты.")
 
 # Окно аттрибуции
-int_value = st.sidebar.number_input("Окно атрибуции", min_value=0, step=1)
+days_to_add = st.sidebar.number_input("Окно атрибуции", min_value=0, step=1)
 
 # Инициализация session_state, если df еще не существует
 if "df" not in st.session_state:
     st.session_state.df = pd.DataFrame()  # Создаем пустой DataFrame
 
 if st.sidebar.button("🔄 Выполнить"):
-    df = execute_query(client_name, tracker_impressions, tracker_conversions, int_value)
+    df = execute_query(client_name, tracker_impressions, tracker_conversions, days_to_add)
         # Если есть данные, отображаем таблицу и кнопку скачивания
     if st.session_state.df is not None:
 
