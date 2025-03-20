@@ -31,44 +31,86 @@ def get_result(client_name, tracker_impressions, tracker_conversions, size):
     second_date = date_range[1].strftime("%Y-%m-%d")
     third_date = (date_range[1] + timedelta(days=size)).strftime("%Y-%m-%d")
 
+    if tracker_impressions == 'hybe':
 
-    query = f"""
-        SELECT
-            advertising_id,
-            event_time,
-            last_interaction as date,
-            customs_string,
-            ad_name,
-            event_name,
-            event_value,
-            ABS(DATEDIFF('day', event_time, last_interaction)) as time_to_conversion 
-        FROM 
-            
+        query = f"""
+            SELECT
+                advertising_id,
+                event_time,
+                last_interaction as date,
+                campaign,
+                bannerid,
+                event_name,
+                event_value,
+                ABS(DATEDIFF('day', event_time, last_interaction)) as time_to_conversion 
+            FROM 
+                
 
-            (SELECT
-                    c.advertising_id,
-                    c.event_time,
-                    a.datetime as last_interaction,
-                    ROW_NUMBER() OVER(PARTITION BY c.advertising_id, c.event_time ORDER BY a.datetime DESC) as win,
-                    a.customs_string,
-                    a.ad_name,
-                    c.event_name,
-                    c.event_value
-                FROM db1.{client_name}_{tracker_conversions} as c
-                JOIN db1.{client_name}_{tracker_impressions} as a ON c.advertising_id = a.advertising_id
-                WHERE datetime BETWEEN '{first_date}' AND '{second_date}' AND
-                event_time BETWEEN '{first_date}' AND '{third_date}' AND
-                (toUnixTimestamp(c.event_time) - toUnixTimestamp(a.datetime)) BETWEEN 0 AND {size}*24*60*60
-                GROUP BY
-                    c.advertising_id,
-                    c.event_time,
-                    last_interaction,
-                    a.customs_string,
-                    a.ad_name,
-                    c.event_name,
-                    c.event_value)
-        WHERE win = 1
-        ORDER BY event_time"""
+                (SELECT
+                        c.advertising_id,
+                        c.event_time,
+                        a.datetime as last_interaction,
+                        ROW_NUMBER() OVER(PARTITION BY c.advertising_id, c.event_time ORDER BY a.datetime DESC) as win,
+                        a.campaign,
+                        a.bannerid,
+                        c.event_name,
+                        c.event_value
+                    FROM db1.{client_name}_{tracker_conversions} as c
+                    JOIN db1.{client_name}_{tracker_impressions} as a ON c.advertising_id = a.advertising_id
+                    WHERE datetime BETWEEN '{first_date}' AND '{second_date}' AND
+                    event_time BETWEEN '{first_date}' AND '{third_date}' AND
+                    (toUnixTimestamp(c.event_time) - toUnixTimestamp(a.datetime)) BETWEEN 0 AND {size}*24*60*60
+                    GROUP BY
+                        c.advertising_id,
+                        c.event_time,
+                        last_interaction,
+                        a.campaign,
+                        a.bannerid,
+                        c.event_name,
+                        c.event_value)
+            WHERE win = 1
+            ORDER BY event_time"""
+
+
+    if tracker_impressions == 'adriver':
+
+        query = f"""
+            SELECT
+                advertising_id,
+                event_time,
+                last_interaction as date,
+                customs_string,
+                ad_name,
+                event_name,
+                event_value,
+                ABS(DATEDIFF('day', event_time, last_interaction)) as time_to_conversion 
+            FROM 
+                
+
+                (SELECT
+                        c.advertising_id,
+                        c.event_time,
+                        a.datetime as last_interaction,
+                        ROW_NUMBER() OVER(PARTITION BY c.advertising_id, c.event_time ORDER BY a.datetime DESC) as win,
+                        a.customs_string,
+                        a.ad_name,
+                        c.event_name,
+                        c.event_value
+                    FROM db1.{client_name}_{tracker_conversions} as c
+                    JOIN db1.{client_name}_{tracker_impressions} as a ON c.advertising_id = a.advertising_id
+                    WHERE datetime BETWEEN '{first_date}' AND '{second_date}' AND
+                    event_time BETWEEN '{first_date}' AND '{third_date}' AND
+                    (toUnixTimestamp(c.event_time) - toUnixTimestamp(a.datetime)) BETWEEN 0 AND {size}*24*60*60
+                    GROUP BY
+                        c.advertising_id,
+                        c.event_time,
+                        last_interaction,
+                        a.customs_string,
+                        a.ad_name,
+                        c.event_name,
+                        c.event_value)
+            WHERE win = 1
+            ORDER BY event_time"""
     
     result = ch_client.execute(query, with_column_types=True) 
 
