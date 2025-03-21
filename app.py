@@ -102,7 +102,8 @@ def get_result(client_name, tracker_impressions, tracker_conversions, size):
                     WHERE 
                         datetime >= %(first_date)s AND datetime <= %(second_date)s
                         AND event_time >= %(first_date)s AND event_time <= %(third_date)s
-                        AND (toUnixTimestamp(c.event_time) - toUnixTimestamp(a.datetime)) BETWEEN 0 AND %(size)s * 24 * 60 * 60
+                        AND (toUnixTimestamp(c.event_time) - toUnixTimestamp(a.datetime)) >= 0 AND 
+                        (toUnixTimestamp(c.event_time) - toUnixTimestamp(a.datetime)) <= %(size)s * 24 * 60 * 60
                     GROUP BY
                         c.advertising_id,
                         c.event_time,
