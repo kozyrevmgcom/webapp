@@ -145,7 +145,7 @@ else:
     st.write("Пожалуйста, выберите обе даты.")
 
 # Окно аттрибуции
-days_to_add = st.sidebar.number_input("Окно атрибуции", min_value=7, step=7)
+days_to_add = st.sidebar.number_input("Окно атрибуции", min_value=0, step=7)
 
 # Инициализация session_state, если df еще не существует
 if "df" not in st.session_state:
