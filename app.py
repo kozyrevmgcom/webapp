@@ -36,8 +36,8 @@ def get_result(client_name, tracker_impressions, tracker_conversions, size):
                 advertising_id,
                 event_time,
                 last_interaction as date,
-                customs_string,
-                ad_name,
+                {ads_column_one},
+                {ads_column_two},
                 event_name,
                 event_value,
                 ABS(DATEDIFF('day', event_time, last_interaction)) as time_to_conversion 
