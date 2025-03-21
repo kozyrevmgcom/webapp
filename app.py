@@ -31,51 +31,7 @@ def get_result(client_name, tracker_impressions, tracker_conversions, size):
     second_date = date_range[1].strftime("%Y-%m-%d")
     third_date = (date_range[1] + timedelta(days=size)).strftime("%Y-%m-%d")
 
-    if tracker_impressions == 'hybe':
-
-        query = f"""
-            SELECT
-                advertising_id,
-                event_time,
-                last_interaction as date,
-                campaign,
-                bannerid,
-                event_name,
-                event_value,
-                ABS(DATEDIFF('day', event_time, last_interaction)) as time_to_conversion 
-            FROM 
-                
-
-                (SELECT
-                        c.advertising_id,
-                        c.event_time,
-                        a.datetime as last_interaction,
-                        ROW_NUMBER() OVER(PARTITION BY c.advertising_id, c.event_time ORDER BY a.datetime DESC) as win,
-                        a.campaign,
-                        a.bannerid,
-                        c.event_name,
-                        c.event_value
-                    FROM db1.{client_name}_{tracker_conversions} as c
-                    JOIN db1.{client_name}_{tracker_impressions} as a ON c.advertising_id = a.advertising_id
-                    WHERE 
-                        datetime >= %(first_date)s AND datetime <= %(second_date)s
-                        AND event_time >= %(first_date)s AND event_time <= %(third_date)s
-                        AND (toUnixTimestamp(c.event_time) - toUnixTimestamp(a.datetime)) BETWEEN 0 AND %(size)s * 24 * 60 * 60
-                    GROUP BY
-                        c.advertising_id,
-                        c.event_time,
-                        last_interaction,
-                        a.campaign,
-                        a.bannerid,
-                        c.event_name,
-                        c.event_value)
-            WHERE win = 1
-            ORDER BY event_time"""
-
-
-    if tracker_impressions == 'adriver':
-
-        query = f"""
+    query = f"""
             SELECT
                 advertising_id,
                 event_time,
@@ -93,12 +49,12 @@ def get_result(client_name, tracker_impressions, tracker_conversions, size):
                         c.event_time,
                         a.datetime as last_interaction,
                         ROW_NUMBER() OVER(PARTITION BY c.advertising_id, c.event_time ORDER BY a.datetime DESC) as win,
-                        a.customs_string,
-                        a.ad_name,
+                        a.%(ads_column_one)s,
+                        a.%(ads_column_two)s,
                         c.event_name,
                         c.event_value
-                    FROM db1.{client_name}_{tracker_conversions} as c
-                    JOIN db1.{client_name}_{tracker_impressions} as a ON c.advertising_id = a.advertising_id
+                    FROM db1.%(client_name)s_%(tracker_conversions)s as c
+                    JOIN db1.%(client_name)s_%(tracker_impressions)s as a ON c.advertising_id = a.advertising_id
                     WHERE 
                         datetime >= %(first_date)s AND datetime <= %(second_date)s
                         AND event_time >= %(first_date)s AND event_time <= %(third_date)s
@@ -108,21 +64,32 @@ def get_result(client_name, tracker_impressions, tracker_conversions, size):
                         c.advertising_id,
                         c.event_time,
                         last_interaction,
-                        a.customs_string,
-                        a.ad_name,
+                        a.%(ads_column_one)s,
+                        a.%(ads_column_two)s,
                         c.event_name,
                         c.event_value)
             WHERE win = 1
             ORDER BY event_time"""
         
+    if tracker_impressions == 'hybe':
+        ads_column_one = 'campaign'
+        ads_column_two = 'bannerid'
+    if tracker_impressions == 'adriver':
+        ads_column_one = 'customs_string'
+        ads_column_two = 'ad_name'
+        
     
     params = {
+        'client_name': client_name,
+        'tracker_conversion': tracker_conversions,
+        'tracker_impressions': tracker_impressions,
         'first_date': first_date,
         'second_date': second_date,
         'third_date': third_date,
+        'ads_column_one': ads_column_one,
+        'ads_column_two': ads_column_two,
         'size': size  # Количество дней
     }
-
     
     result = ch_client.execute(query, params, with_column_types=True) 
 
