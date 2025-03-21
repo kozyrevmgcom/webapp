@@ -57,9 +57,10 @@ def get_result(client_name, tracker_impressions, tracker_conversions, size):
                         c.event_value
                     FROM db1.{client_name}_{tracker_conversions} as c
                     JOIN db1.{client_name}_{tracker_impressions} as a ON c.advertising_id = a.advertising_id
-                    WHERE datetime BETWEEN '{first_date}' AND '{second_date}' AND
-                    event_time BETWEEN '{first_date}' AND '{third_date}' AND
-                    (toUnixTimestamp(c.event_time) - toUnixTimestamp(a.datetime)) BETWEEN 0 AND {size}*24*60*60
+                    WHERE 
+                        datetime >= %(first_date)s AND datetime <= %(second_date)s
+                        AND event_time >= %(first_date)s AND event_time <= %(third_date)s
+                        AND (toUnixTimestamp(c.event_time) - toUnixTimestamp(a.datetime)) BETWEEN 0 AND %(size)s * 24 * 60 * 60
                     GROUP BY
                         c.advertising_id,
                         c.event_time,
@@ -98,9 +99,10 @@ def get_result(client_name, tracker_impressions, tracker_conversions, size):
                         c.event_value
                     FROM db1.{client_name}_{tracker_conversions} as c
                     JOIN db1.{client_name}_{tracker_impressions} as a ON c.advertising_id = a.advertising_id
-                    WHERE datetime BETWEEN '{first_date}' AND '{second_date}' AND
-                    event_time BETWEEN '{first_date}' AND '{third_date}' AND
-                    (toUnixTimestamp(c.event_time) - toUnixTimestamp(a.datetime)) BETWEEN 0 AND {size}*24*60*60
+                    WHERE 
+                        datetime >= %(first_date)s AND datetime <= %(second_date)s
+                        AND event_time >= %(first_date)s AND event_time <= %(third_date)s
+                        AND (toUnixTimestamp(c.event_time) - toUnixTimestamp(a.datetime)) BETWEEN 0 AND %(size)s * 24 * 60 * 60
                     GROUP BY
                         c.advertising_id,
                         c.event_time,
@@ -111,8 +113,17 @@ def get_result(client_name, tracker_impressions, tracker_conversions, size):
                         c.event_value)
             WHERE win = 1
             ORDER BY event_time"""
+        
     
-    result = ch_client.execute(query, with_column_types=True) 
+    params = {
+        'first_date': first_date,
+        'second_date': second_date,
+        'third_date': third_date,
+        'size': size  # Количество дней
+    }
+
+    
+    result = ch_client.execute(query, params, with_column_types=True) 
 
     data = [row for row in result[0]]  # Данные
     columns = [col[0] for col in result[1]]  # Названия колонок
