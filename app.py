@@ -49,8 +49,8 @@ def get_result(client_name, tracker_impressions, tracker_conversions, size):
                         c.event_time,
                         a.datetime as last_interaction,
                         ROW_NUMBER() OVER(PARTITION BY c.advertising_id, c.event_time ORDER BY a.datetime DESC) as win,
-                        a.%(ads_column_one)s,
-                        a.%(ads_column_two)s,
+                        a.{ads_column_one},
+                        a.{ads_column_two},
                         c.event_name,
                         c.event_value
                     FROM db1.{client_name}_{tracker_conversions} as c
@@ -64,8 +64,8 @@ def get_result(client_name, tracker_impressions, tracker_conversions, size):
                         c.advertising_id,
                         c.event_time,
                         last_interaction,
-                        a.%(ads_column_one)s,
-                        a.%(ads_column_two)s,
+                        a.{ads_column_one},
+                        a.{ads_column_two},
                         c.event_name,
                         c.event_value)
             WHERE win = 1
