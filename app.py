@@ -3,7 +3,7 @@ from clickhouse_driver import Client
 from clickhouse_driver.errors import ServerException
 import pandas as pd
 import time
-from datetime import date, timedelta
+from datetime import date, timedelta, datetime
 
 # загружаем переменные виртуального окружения
 
@@ -129,7 +129,7 @@ tracker_conversions = st.sidebar.selectbox("Выберите трекер кон
 
 
 # Текущая дата
-today = date.today()
+today = datetime.today()
 # День недели (0 - понедельник, 6 - воскресенье)
 weekday = today.weekday()
 days_to_monday = (weekday - 0) % 7 or 7
