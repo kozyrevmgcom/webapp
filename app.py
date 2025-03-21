@@ -31,6 +31,13 @@ def get_result(client_name, tracker_impressions, tracker_conversions, size):
     second_date = date_range[1].strftime("%Y-%m-%d")
     third_date = (date_range[1] + timedelta(days=size)).strftime("%Y-%m-%d")
 
+    if tracker_impressions == 'hybe':
+        ads_column_one = 'campaign'
+        ads_column_two = 'bannerid'
+    if tracker_impressions == 'adriver':
+        ads_column_one = 'customs_string'
+        ads_column_two = 'ad_name'
+
     query = f"""
             SELECT
                 advertising_id,
@@ -59,7 +66,7 @@ def get_result(client_name, tracker_impressions, tracker_conversions, size):
                         datetime >= %(first_date)s AND datetime <= %(second_date)s
                         AND event_time >= %(first_date)s AND event_time <= %(third_date)s
                         AND (toUnixTimestamp(c.event_time) - toUnixTimestamp(a.datetime)) >= 0 AND 
-                        (toUnixTimestamp(c.event_time) - toUnixTimestamp(a.datetime)) <= %(size)s * 24 * 60 * 60
+                        (toUnixTimestamp(c.event_time) - toUnixTimestamp(a.datetime)) <= {size} * 24 * 60 * 60
                     GROUP BY
                         c.advertising_id,
                         c.event_time,
@@ -71,12 +78,7 @@ def get_result(client_name, tracker_impressions, tracker_conversions, size):
             WHERE win = 1
             ORDER BY event_time"""
         
-    if tracker_impressions == 'hybe':
-        ads_column_one = 'campaign'
-        ads_column_two = 'bannerid'
-    if tracker_impressions == 'adriver':
-        ads_column_one = 'customs_string'
-        ads_column_two = 'ad_name'
+
         
     
     params = {
@@ -84,8 +86,7 @@ def get_result(client_name, tracker_impressions, tracker_conversions, size):
         'second_date': second_date,
         'third_date': third_date,
         'ads_column_one': ads_column_one,
-        'ads_column_two': ads_column_two,
-        'size': size  # Количество дней
+        'ads_column_two': ads_column_two
     }
     
     result = ch_client.execute(query, params, with_column_types=True) 
