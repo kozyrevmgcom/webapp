@@ -28,7 +28,7 @@ def get_result(client_name, tracker_impressions, tracker_conversions, size):
     # result = ch_client.execute(f'SELECT * FROM {client_name}_{tracker_impressions} LIMIT 10')
 
     first_date = date_range[0].strftime("%Y-%m-%d")
-    second_date = date_range[1].strftime("%Y-%m-%d")
+    second_date = (date_range[1] + timedelta(days=1)).strftime("%Y-%m-%d")
     third_date = (date_range[1] + timedelta(days=size)).strftime("%Y-%m-%d")
 
     if tracker_impressions == 'hybe':
@@ -62,11 +62,9 @@ def get_result(client_name, tracker_impressions, tracker_conversions, size):
                         c.event_value
                     FROM db1.{client_name}_{tracker_conversions} as c
                     JOIN db1.{client_name}_{tracker_impressions} as a ON c.advertising_id = a.advertising_id
-                    WHERE 
-                        datetime >= %(first_date)s AND datetime <= %(second_date)s
-                        AND event_time >= %(first_date)s AND event_time <= %(third_date)s
-                        AND (toUnixTimestamp(c.event_time) - toUnixTimestamp(a.datetime)) >= 0 AND 
-                        (toUnixTimestamp(c.event_time) - toUnixTimestamp(a.datetime)) <= {size} * 24 * 60 * 60
+                    WHERE datetime BETWEEN '{first_date}' AND '{second_date}' AND
+                    event_time BETWEEN '{first_date}' AND '{third_date}' AND
+                    (toUnixTimestamp(c.event_time) - toUnixTimestamp(a.datetime)) BETWEEN 0 AND {size}*24*60*60
                     GROUP BY
                         c.advertising_id,
                         c.event_time,
