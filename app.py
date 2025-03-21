@@ -130,7 +130,7 @@ tracker_conversions = st.sidebar.selectbox("Выберите трекер кон
 # Выбор даты в режиме диапазона
 date_range = st.sidebar.date_input(
     "Выберите период рекламной кампании",
-    value=(date.today() - timedelta(days=14), date.today() - timedelta(days=7)),  # Значение по умолчанию (сегодня)
+    value=(date.today() - timedelta(days=16), date.today() - timedelta(days=9)),  # Значение по умолчанию (сегодня)
     min_value=date(2025, 1, 1),  # Минимальная возможная дата
     max_value=date.today() - timedelta(days=1),  # Максимальная возможная дата
 )
