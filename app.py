@@ -3,7 +3,7 @@ from clickhouse_driver import Client
 from clickhouse_driver.errors import ServerException
 import pandas as pd
 import time
-from datetime import date, timedelta, datetime
+from datetime import date, timedelta
 
 # загружаем переменные виртуального окружения
 
@@ -127,21 +127,10 @@ tracker_conversions_options = {"hoff": ["appsflyer"], "rendezv": ["appsflyer"]}
 tracker_conversions = st.sidebar.selectbox("Выберите трекер конверсий", tracker_conversions_options[client_name])
 
 
-
-# Текущая дата
-today = datetime.today()
-# День недели (0 - понедельник, 6 - воскресенье)
-weekday = today.weekday()
-days_to_monday = (weekday - 0) % 7 or 7
-last_monday = today - timedelta(days=days_to_monday)
-days_to_sunday = (weekday - 6) % 7 or 7  # Если сегодня воскресенье, вернёт предыдущее
-last_sunday = today - timedelta(days=days_to_sunday)
-
-
 # Выбор даты в режиме диапазона
 date_range = st.sidebar.date_input(
     "Выберите период рекламной кампании",
-    value=(last_monday, last_sunday),  # Значение по умолчанию (сегодня)
+    value=(date.today() - timedelta(days=14), date.today() - timedelta(days=7)),  # Значение по умолчанию (сегодня)
     min_value=date(2025, 1, 1),  # Минимальная возможная дата
     max_value=date.today() - timedelta(days=1),  # Максимальная возможная дата
 )
