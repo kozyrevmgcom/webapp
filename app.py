@@ -53,8 +53,8 @@ def get_result(client_name, tracker_impressions, tracker_conversions, size):
                         a.%(ads_column_two)s,
                         c.event_name,
                         c.event_value
-                    FROM db1.%(client_name)s_%(tracker_conversions)s as c
-                    JOIN db1.%(client_name)s_%(tracker_impressions)s as a ON c.advertising_id = a.advertising_id
+                    FROM db1.{client_name}_{tracker_conversions} as c
+                    JOIN db1.{client_name}_{tracker_impressions} as a ON c.advertising_id = a.advertising_id
                     WHERE 
                         datetime >= %(first_date)s AND datetime <= %(second_date)s
                         AND event_time >= %(first_date)s AND event_time <= %(third_date)s
@@ -80,9 +80,6 @@ def get_result(client_name, tracker_impressions, tracker_conversions, size):
         
     
     params = {
-        'client_name': client_name,
-        'tracker_conversion': tracker_conversions,
-        'tracker_impressions': tracker_impressions,
         'first_date': first_date,
         'second_date': second_date,
         'third_date': third_date,
